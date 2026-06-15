@@ -1,0 +1,688 @@
+<!-- ============================================================
+     AIxUXR Engagement ROI Calculator  (v3 — brand reskin)
+     Self-contained. No dependencies. Brand-matched to heykaleb.com
+     (navy + coral + textured paper, WCAG AA). Multi-currency.
+
+     TYPE: Playfair Display (display/numbers) · Quicksand (labels)
+           · Lexend (body). Permanent Marker is community-only, not here.
+     COLOR RULE: bright coral = decoration + fills only (never readable text).
+           Teal Ink (#356E6E) carries accent text on paper. On navy, pair with
+           blush / jade teal / paper — never coral (too harsh).
+     TO CUSTOMIZE: edit the :root variables and the CONFIG object below.
+     ============================================================ -->
+
+<div id="aixuxr-roi-calc">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,800;1,900&family=Quicksand:wght@400;500;600;700&family=Lexend:wght@300;400;500;600;700&display=swap');
+
+    #aixuxr-roi-calc {
+      /* ---- BRAND TOKENS (navy / coral / paper, WCAG AA) ---- */
+      --coral: #FA6060;          /* bright signal: accents, decoration, fills, slider thumb */
+      --coral-ink: #356E6E;      /* RETIRED -> teal-ink; coral is never readable text */
+      --teal: #549C9C;           /* support */
+      --teal-ink: #356E6E;       /* teal text on paper */
+      --blush: #EFA8A8;          /* small labels on navy */
+      --dark-text: #3a1414;      /* dark text used ON coral fills (5.35 contrast) */
+      --amber: #FA6060;          /* legacy alias -> coral (fills, slider thumb) */
+      --amber-deep: #356E6E;     /* legacy alias -> teal-ink (readable accent text) */
+      --ink: #243C54;            /* navy: primary text + dark fills */
+      --ink-deep: #1A2C40;
+      --black: #1A2C40;          /* legacy alias -> deep navy (dark panels) */
+      --paper: #F3F1EC;          /* textured paper substrate */
+      --paper-deep: #E9E4D9;
+      --warm: #33424F;           /* body / secondary text (AAA on paper) */
+      --line: #DAD3C5;           /* hairline borders */
+      --track: #E4DFD3;          /* chart bar track (slider line is navy) */
+      --btn-radius: 4px;         /* one radius for every button */
+      --display: 'Playfair Display', Georgia, serif;     /* headlines + big numbers */
+      --marker: 'Playfair Display', Georgia, serif;      /* legacy alias -> Playfair */
+      --head: 'Quicksand', -apple-system, system-ui, sans-serif;  /* labels, eyebrows */
+      --sans: 'Lexend', -apple-system, system-ui, sans-serif;     /* body */
+      --serif: 'Playfair Display', Georgia, serif;       /* alias -> display */
+      /* -------------------------------------------- */
+
+      background-color: var(--paper);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+      background-blend-mode: multiply;
+      font-family: var(--sans);
+      font-weight: 300;
+      color: var(--ink);
+      line-height: 1.5;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 56px 32px;
+    }
+    #aixuxr-roi-calc *, #aixuxr-roi-calc *::before, #aixuxr-roi-calc *::after { box-sizing: border-box; }
+    #aixuxr-roi-calc .serif { font-family: var(--serif); }
+
+    #aixuxr-roi-calc a { color: var(--teal-ink); text-decoration: underline; text-underline-offset: 2px; }
+    #aixuxr-roi-calc a:hover { color: var(--ink); }
+
+    /* Currency switch */
+    #aixuxr-roi-calc .currency { display: flex; gap: 0; margin: 0 auto 18px; border: 1.5px solid var(--blush); border-radius: var(--btn-radius); overflow: hidden; width: fit-content; background: var(--ink); }
+    #aixuxr-roi-calc .currency button {
+      font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: .03em;
+      padding: 8px 18px; border: 0; background: transparent; color: var(--blush); cursor: pointer;
+      border-right: 1.5px solid var(--blush); transition: background .12s, color .12s;
+    }
+    #aixuxr-roi-calc .currency button:last-child { border-right: 0; }
+    #aixuxr-roi-calc .currency button.active { background: var(--paper); color: var(--ink); }
+
+    #aixuxr-roi-calc .eyebrow { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--warm); font-weight: 600; margin: 0 0 24px; }
+    #aixuxr-roi-calc h1.headline { font-family: var(--serif); font-weight: 500; font-size: clamp(34px,5vw,58px); line-height: 1.04; color: var(--ink); margin: 0 0 22px; max-width: 18ch; }
+    #aixuxr-roi-calc h1.headline .accent { font-style: italic; color: var(--teal-ink); }
+    #aixuxr-roi-calc .lede { color: var(--warm); font-size: clamp(15px,1.6vw,18px); max-width: 60ch; margin: 0; line-height: 1.6; }
+    #aixuxr-roi-calc .rule { height: 2px; background: var(--ink); margin: 40px 0; border: 0; }
+
+    #aixuxr-roi-calc .grid { display: grid; grid-template-columns: 5fr 7fr; gap: 48px; margin-bottom: 56px; }
+    #aixuxr-roi-calc .section-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--warm); font-weight: 600; margin: 0 0 28px; }
+
+    /* Sliders */
+    #aixuxr-roi-calc .field { margin-bottom: 36px; }
+    #aixuxr-roi-calc .field-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+    #aixuxr-roi-calc .field-label { font-size: 14px; font-weight: 500; color: var(--ink); }
+    #aixuxr-roi-calc .field-value { font-family: var(--serif); font-size: 26px; color: var(--ink); }
+    #aixuxr-roi-calc .field-helper { font-size: 12px; color: var(--warm); font-style: italic; margin: 12px 0 0; min-height: 2.4em; }
+
+    #aixuxr-roi-calc input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 3px; background: var(--ink); cursor: pointer; margin: 8px 0; }
+    #aixuxr-roi-calc input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; height: 22px; width: 22px; background: var(--amber); border: 2px solid var(--blush); border-radius: 50%; transition: transform .15s; }
+    #aixuxr-roi-calc input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.12); }
+    #aixuxr-roi-calc input[type=range]::-moz-range-thumb { height: 20px; width: 20px; background: var(--amber); border: 2px solid var(--blush); border-radius: 50%; cursor: pointer; }
+    #aixuxr-roi-calc input[type=range]::-moz-range-track { height: 3px; background: var(--ink); }
+    #aixuxr-roi-calc input[type=range]:focus { outline: none; }
+    #aixuxr-roi-calc input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(250,96,96,.35); }
+
+    /* Metrics */
+    #aixuxr-roi-calc .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 36px; }
+    #aixuxr-roi-calc .metric { border-top: 2px solid var(--ink); padding-top: 16px; }
+    #aixuxr-roi-calc .metric.accent { border-top-color: var(--amber); }
+    #aixuxr-roi-calc .metric-label { font-size: 12px; color: var(--warm); margin: 0 0 12px; }
+    #aixuxr-roi-calc .metric-value { font-family: var(--serif); font-size: clamp(34px,5vw,48px); line-height: 1; color: var(--ink); margin: 0; }
+    #aixuxr-roi-calc .metric.accent .metric-value { color: var(--ink); }
+    #aixuxr-roi-calc .metric-sub { font-size: 12px; color: var(--warm); margin: 12px 0 0; }
+
+    /* Chart */
+    #aixuxr-roi-calc .chart { background: #FCFBF8; border: 1px solid var(--line); padding: 24px; margin-bottom: 24px; }
+    #aixuxr-roi-calc .chart-title { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--warm); font-weight: 600; margin: 0 0 20px; }
+    #aixuxr-roi-calc .bar-row { display: grid; grid-template-columns: 150px 1fr auto; align-items: center; gap: 14px; margin-bottom: 14px; }
+    #aixuxr-roi-calc .bar-row:last-child { margin-bottom: 0; }
+    #aixuxr-roi-calc .bar-name { font-size: 12px; color: var(--warm); }
+    #aixuxr-roi-calc .bar-track { background: var(--track); height: 28px; }
+    #aixuxr-roi-calc .bar-fill { height: 100%; width: 0; transition: width .35s ease-out; }
+    #aixuxr-roi-calc .bar-fill.dark { background: var(--ink); }
+    #aixuxr-roi-calc .bar-fill.amber { background: var(--amber); }
+    #aixuxr-roi-calc .bar-amt { font-size: 13px; font-family: var(--serif); color: var(--ink); white-space: nowrap; }
+
+    /* Recommendation — black card, amber accents (on-brand) */
+    #aixuxr-roi-calc .rec { background: var(--black); color: #fff; padding: 32px; }
+    #aixuxr-roi-calc .rec-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blush); margin: 0 0 12px; }
+    #aixuxr-roi-calc .rec-name { font-family: var(--serif); font-size: clamp(22px,3vw,30px); line-height: 1.15; margin: 0 0 12px; color: #fff; }
+    #aixuxr-roi-calc .rec-desc { color: #d8d4cb; font-size: 14px; line-height: 1.6; margin: 0 0 24px; }
+    #aixuxr-roi-calc .rec-meta { display: flex; gap: 48px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.18); }
+    #aixuxr-roi-calc .rec-meta-label { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: #aab6c0; margin: 0 0 4px; }
+    #aixuxr-roi-calc .rec-meta-value { font-family: var(--serif); font-size: 20px; margin: 0; color: var(--blush); }
+
+    /* Beyond */
+    #aixuxr-roi-calc .beyond { border-top: 1.5px solid var(--line); padding-top: 56px; margin-bottom: 56px; }
+    #aixuxr-roi-calc .beyond h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(28px,4vw,38px); color: var(--ink); margin: 0 0 16px; }
+    #aixuxr-roi-calc .beyond h2 .accent { font-style: italic; color: var(--teal-ink); }
+    #aixuxr-roi-calc .beyond .lede { margin-bottom: 44px; }
+    #aixuxr-roi-calc .levers { display: grid; grid-template-columns: repeat(3,1fr); gap: 36px; }
+    #aixuxr-roi-calc .lever-num { font-family: var(--serif); font-size: 28px; color: var(--amber); margin: 0 0 10px; line-height: 1; }
+    #aixuxr-roi-calc .lever-title { font-family: var(--serif); font-size: 22px; color: var(--ink); line-height: 1.15; margin: 0 0 12px; }
+    #aixuxr-roi-calc .lever-body { font-size: 14px; color: var(--warm); line-height: 1.6; margin: 0; }
+    #aixuxr-roi-calc .lever-body a { color: var(--teal-ink); }
+
+    /* CTA — navy panel, coral button (cool ground, warm signal) */
+    #aixuxr-roi-calc .cta { background: var(--ink); color: var(--paper); padding: 56px; margin-bottom: 48px; }
+    #aixuxr-roi-calc .cta-inner { max-width: 60ch; }
+    #aixuxr-roi-calc .cta h2 { font-family: var(--display); font-weight: 800; font-size: clamp(26px,4vw,40px); line-height: 1.12; margin: 0 0 16px; color: var(--paper); }
+    #aixuxr-roi-calc .cta p { color: #c7d2da; line-height: 1.6; margin: 0 0 32px; font-size: 16px; }
+    #aixuxr-roi-calc .cta a.book { display: inline-block; background: var(--paper); color: var(--ink); padding: 16px 34px; border-radius: var(--btn-radius); font-weight: 700; font-family: var(--head); letter-spacing: .01em; text-decoration: none; transition: background .15s, color .15s; }
+    #aixuxr-roi-calc .cta a.book:hover { background: var(--blush); color: var(--ink); }
+    #aixuxr-roi-calc .cta .contact { color: #9fb0bd; font-size: 14px; margin: 36px 0 0; }
+
+    /* Methodology */
+    #aixuxr-roi-calc .method { border-top: 1.5px solid var(--line); padding-top: 36px; color: var(--warm); font-size: 12px; line-height: 1.7; }
+    #aixuxr-roi-calc .method-label { font-weight: 700; color: var(--ink); letter-spacing: .08em; text-transform: uppercase; font-size: 10px; margin: 0 0 12px; }
+    #aixuxr-roi-calc .method p { max-width: 82ch; margin: 0 0 12px; }
+    #aixuxr-roi-calc .method a { color: var(--teal-ink); }
+
+    /* Scenario presets */
+    #aixuxr-roi-calc .presets { display: flex; gap: 8px; margin: 14px 0 0; flex-wrap: wrap; }
+    #aixuxr-roi-calc .preset {
+      font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .02em;
+      padding: 7px 14px; border: 1.5px solid var(--line); border-radius: var(--btn-radius); background: #fff; color: var(--warm);
+      cursor: pointer; transition: border-color .12s, color .12s, background .12s;
+    }
+    #aixuxr-roi-calc .preset:hover { border-color: var(--ink); color: var(--ink); }
+    #aixuxr-roi-calc .preset.active { border-color: var(--ink); background: var(--ink); color: #fff; }
+
+    /* Plain-English summary band */
+    #aixuxr-roi-calc .summary { border: 1px solid var(--line); border-left: 4px solid var(--coral); background: #fff; padding: 28px 32px; margin: 0 0 56px; display: flex; align-items: flex-start; gap: 18px; }
+    #aixuxr-roi-calc .summary-mark { font-family: var(--serif); font-weight: 900; font-size: 48px; color: var(--coral); line-height: .8; flex-shrink: 0; }
+    #aixuxr-roi-calc .summary-text { font-family: var(--serif); font-size: clamp(17px,2.2vw,22px); line-height: 1.45; color: var(--ink); margin: 0; }
+    #aixuxr-roi-calc .summary-text strong { color: var(--teal-ink); font-weight: 700; }
+
+    @media (max-width: 820px) {
+      #aixuxr-roi-calc { padding: 40px 20px; }
+      #aixuxr-roi-calc .grid { grid-template-columns: 1fr; gap: 36px; }
+      #aixuxr-roi-calc .levers { grid-template-columns: 1fr; gap: 28px; }
+      #aixuxr-roi-calc .cta { padding: 36px 24px; }
+      #aixuxr-roi-calc .bar-row { grid-template-columns: 104px 1fr auto; gap: 10px; }
+      #aixuxr-roi-calc .rec-meta { gap: 28px; }
+      #aixuxr-roi-calc .summary { padding: 22px; gap: 12px; }
+      #aixuxr-roi-calc .summary-mark { font-size: 34px; }
+    }
+
+    /* ===== Brand typography — hey kaleb (navy / coral / paper) ===== */
+    /* H1: Playfair Display Black, italic Coral Ink pivot accent */
+    #aixuxr-roi-calc h1.headline { font-family: var(--display); font-weight: 900; letter-spacing: -.015em; line-height: 1.04; font-size: clamp(34px,5vw,60px); color: var(--ink); }
+    #aixuxr-roi-calc h1.headline .accent { font-style: italic; font-weight: 800; color: var(--teal-ink); }
+    /* H2: Playfair Display, italic pivot (Coral Ink on paper, bright coral on navy) */
+    #aixuxr-roi-calc .beyond h2,
+    #aixuxr-roi-calc .cta h2 { font-family: var(--display); font-weight: 800; letter-spacing: -.01em; line-height: 1.1; }
+    #aixuxr-roi-calc .beyond h2 { font-size: clamp(28px,3.6vw,40px); color: var(--ink); }
+    #aixuxr-roi-calc .cta h2 { font-size: clamp(26px,3.6vw,38px); color: var(--paper); }
+    #aixuxr-roi-calc .beyond h2 .accent { font-style: italic; color: var(--teal-ink); }
+    #aixuxr-roi-calc .cta h2 .accent { font-style: italic; color: var(--blush); }
+    #aixuxr-roi-calc .summary-mark { font-family: var(--display); }
+    /* Eyebrows + working labels: Quicksand 700 caps */
+    #aixuxr-roi-calc .eyebrow,
+    #aixuxr-roi-calc .section-label,
+    #aixuxr-roi-calc .chart-title,
+    #aixuxr-roi-calc .rec-label,
+    #aixuxr-roi-calc .rec-meta-label,
+    #aixuxr-roi-calc .method-label { font-family: var(--head); font-weight: 700; }
+    #aixuxr-roi-calc .eyebrow { color: var(--teal-ink); }
+    #aixuxr-roi-calc .section-label,
+    #aixuxr-roi-calc .chart-title,
+    #aixuxr-roi-calc .method-label { color: var(--teal-ink); }
+    /* Big numbers + sub-headlines: Playfair Display */
+    #aixuxr-roi-calc .metric-value { font-family: var(--display); font-weight: 800; }
+    #aixuxr-roi-calc .field-value { font-family: var(--display); font-weight: 700; }
+    #aixuxr-roi-calc .bar-amt { font-family: var(--display); font-weight: 700; }
+    #aixuxr-roi-calc .rec-name { font-family: var(--display); font-weight: 800; }
+    #aixuxr-roi-calc .rec-meta-value { font-family: var(--display); font-weight: 800; }
+    #aixuxr-roi-calc .lever-num { font-family: var(--display); font-weight: 900; color: var(--teal-ink); }
+    #aixuxr-roi-calc .lever-title { font-family: var(--display); font-weight: 800; }
+    /* Body / quotable summary: Lexend, numbers in Playfair Coral Ink */
+    #aixuxr-roi-calc .summary-text { font-family: var(--sans); font-weight: 400; }
+    #aixuxr-roi-calc .summary-text strong { font-family: var(--display); font-weight: 800; color: var(--teal-ink); }
+
+    /* ===== Usability pass: editable inputs, hero metric, a11y ===== */
+    /* Editable numeric inputs paired with each slider */
+    #aixuxr-roi-calc .field-value { display: inline-flex; align-items: baseline; gap: 1px; }
+    #aixuxr-roi-calc .num {
+      font-family: var(--display); font-weight: 700; font-size: 26px; color: var(--ink);
+      width: 3.4ch; border: 0; border-bottom: 2px solid var(--line); background: transparent;
+      text-align: right; padding: 0 2px 2px; -moz-appearance: textfield; line-height: 1.1;
+    }
+    #aixuxr-roi-calc .num.num-wide { width: 7.2ch; }
+    #aixuxr-roi-calc .num::-webkit-outer-spin-button,
+    #aixuxr-roi-calc .num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    #aixuxr-roi-calc .num:focus { outline: none; border-bottom-color: var(--coral); }
+    #aixuxr-roi-calc .cur-sym { font-family: var(--display); font-weight: 700; font-size: 26px; color: var(--ink); }
+    #aixuxr-roi-calc .unit { font-family: var(--sans); font-size: 14px; color: var(--warm); }
+    #aixuxr-roi-calc .info { font-size: 13px; color: var(--teal-ink); cursor: help; }
+
+    /* Inputs column header + reset */
+    #aixuxr-roi-calc .col-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+    #aixuxr-roi-calc .col-head .section-label { margin: 0; }
+    #aixuxr-roi-calc .reset { font-family: var(--head); font-weight: 600; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--teal-ink); background: transparent; border: 0; cursor: pointer; padding: 4px 2px; }
+    #aixuxr-roi-calc .reset:hover { color: var(--ink); }
+
+    /* Single dominant answer: ROI hero */
+    #aixuxr-roi-calc .metrics { grid-template-columns: 1fr; gap: 22px; }
+    #aixuxr-roi-calc .metric.hero { border-top-width: 3px; }
+    #aixuxr-roi-calc .metric.hero .metric-value { font-size: clamp(52px,8vw,76px); }
+
+    /* Volume-discount human-touch callout on the rec card */
+    #aixuxr-roi-calc .rec-note { display: inline-flex; align-items: center; gap: 8px; margin: 14px 0 0; font-family: var(--head); font-weight: 600; font-size: 12px; letter-spacing: .04em; color: var(--blush); }
+    #aixuxr-roi-calc .rec-note::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--coral); flex: 0 0 auto; }
+
+    /* Visible keyboard focus on every control */
+    #aixuxr-roi-calc button:focus-visible,
+    #aixuxr-roi-calc a:focus-visible,
+    #aixuxr-roi-calc .num:focus-visible,
+    #aixuxr-roi-calc .info:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+
+    /* Larger slider thumb (touch) */
+    #aixuxr-roi-calc input[type=range]::-webkit-slider-thumb { height: 26px; width: 26px; }
+    #aixuxr-roi-calc input[type=range]::-moz-range-thumb { height: 24px; width: 24px; }
+
+    /* Respect reduced-motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      #aixuxr-roi-calc *, #aixuxr-roi-calc .bar-fill { transition: none !important; }
+    }
+  </style>
+
+  <!-- Header -->
+  <p class="eyebrow">Loosbrock Strategies &middot; AIxUXR Consultancy</p>
+  <h1 class="headline">What's the return on research-team AI <span class="accent">capability</span>?</h1>
+  <p class="lede">A transparent calculator for research leaders evaluating an AI capability investment. Every assumption is visible and sourced &mdash; adjust the inputs to your team's context. The math is the floor; the qualitative value sits above it.</p>
+
+  <hr class="rule" />
+
+  <!-- Currency (centered, adjacent to the summary it drives) -->
+  <div class="currency" id="curr-switch" role="group" aria-label="Display currency">
+    <button data-cur="USD" class="active" type="button" aria-pressed="true">$ USD</button>
+    <button data-cur="GBP" type="button" aria-pressed="false">&pound; GBP</button>
+    <button data-cur="EUR" type="button" aria-pressed="false">&euro; EUR</button>
+  </div>
+
+  <!-- Plain-English answer (BLUF) — live region for screen readers -->
+  <div class="summary" role="status" aria-live="polite" aria-atomic="true">
+    <span class="summary-mark" aria-hidden="true">&ldquo;</span>
+    <p class="summary-text" id="summary-text">Adjust the inputs below to see your team&rsquo;s return.</p>
+  </div>
+
+  <div class="grid">
+    <!-- Inputs -->
+    <div>
+      <div class="col-head">
+        <p class="section-label" id="inputs-label">Your team</p>
+        <button type="button" class="reset" id="reset-btn">Reset</button>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label class="field-label" for="in-team" id="lbl-team">Researchers on the team</label>
+          <span class="field-value"><input type="number" class="num" id="num-team" min="5" max="60" step="1" value="20" aria-labelledby="lbl-team"></span>
+        </div>
+        <input type="range" id="in-team" min="5" max="60" step="1" value="20" aria-labelledby="lbl-team" aria-valuetext="20 researchers" />
+        <p class="field-helper" id="help-team"></p>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label class="field-label" for="in-cost" id="lbl-cost">Fully-loaded annual cost / researcher <span class="info" tabindex="0" role="note" aria-label="Fully-loaded means salary plus benefits plus overhead" title="Salary + benefits + overhead">&#9432;</span></label>
+          <span class="field-value"><span class="cur-sym" id="cost-sym" aria-hidden="true">$</span><input type="number" class="num num-wide" id="num-cost" min="80000" max="250000" step="5000" value="150000" aria-labelledby="lbl-cost"></span>
+        </div>
+        <input type="range" id="in-cost" min="80000" max="250000" step="5000" value="150000" aria-labelledby="lbl-cost" aria-valuetext="$150,000" />
+        <p class="field-helper" id="help-cost">Salary + benefits + overhead. Default reflects the regional senior-UXR average.</p>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label class="field-label" for="in-hours" id="lbl-hours">Hours saved / researcher / week</label>
+          <span class="field-value"><input type="number" class="num" id="num-hours" min="1" max="8" step="0.1" value="2.2" aria-labelledby="lbl-hours"> <span class="unit" aria-hidden="true">hrs</span></span>
+        </div>
+        <input type="range" id="in-hours" min="1" max="8" step="0.1" value="2.2" aria-labelledby="lbl-hours" aria-valuetext="2.2 hours per week" />
+        <div class="presets" id="presets" role="group" aria-label="Adoption presets">
+          <button class="preset" data-hours="2.2" type="button">Conservative</button>
+          <button class="preset" data-hours="4" type="button">Moderate</button>
+          <button class="preset" data-hours="6" type="button">Aggressive</button>
+        </div>
+        <p class="field-helper" id="help-hours"></p>
+      </div>
+    </div>
+
+    <!-- Outputs -->
+    <div>
+      <p class="section-label">Year 1 outcomes</p>
+
+      <div class="metrics">
+        <div class="metric accent hero">
+          <p class="metric-label">Year 1 ROI multiplier</p>
+          <p class="metric-value" id="out-roi">0&times;</p>
+          <p class="metric-sub" id="out-payback">Payback in ~0 months</p>
+        </div>
+        <div class="metric">
+          <p class="metric-label">Annual value of recovered time</p>
+          <p class="metric-value" id="out-value">$0</p>
+          <p class="metric-sub" id="out-hours-total">0 researcher hours / year</p>
+        </div>
+      </div>
+
+      <div class="chart">
+        <p class="chart-title">Investment vs. Year 1 recovered value</p>
+        <div class="bar-row">
+          <span class="bar-name">Engagement investment</span>
+          <div class="bar-track"><div class="bar-fill dark" id="bar-invest"></div></div>
+          <span class="bar-amt" id="amt-invest">$0</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-name">Year 1 recovered value</span>
+          <div class="bar-track"><div class="bar-fill amber" id="bar-value"></div></div>
+          <span class="bar-amt" id="amt-value">$0</span>
+        </div>
+      </div>
+
+      <div class="rec">
+        <p class="rec-label">Recommended starting point</p>
+        <h3 class="rec-name" id="rec-name">&mdash;</h3>
+        <p class="rec-desc" id="rec-desc">&mdash;</p>
+        <p class="rec-note" id="rec-note" style="display:none"></p>
+        <div class="rec-meta">
+          <div>
+            <p class="rec-meta-label">Investment from</p>
+            <p class="rec-meta-value" id="rec-invest">$0</p>
+          </div>
+          <div>
+            <p class="rec-meta-label">Timeline</p>
+            <p class="rec-meta-value" id="rec-timeline">&mdash;</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Beyond -->
+  <div class="beyond">
+    <h2>Beyond the <span class="accent">time math</span></h2>
+    <p class="lede">Time-recovery is the floor, not the ceiling. A real business case includes three more value levers &mdash; each meaningfully larger than time savings, though harder to quantify upfront. Every figure below links to its source.</p>
+    <div class="levers">
+      <div>
+        <p class="lever-num">01</p>
+        <p class="lever-title">Quality compound</p>
+        <p class="lever-body">"AI Leaders" achieve 2.3&times; faster adoption and 67% higher AI ROI than laggards (<a href="https://www.bcg.com/capabilities/artificial-intelligence" target="_blank" rel="noopener">BCG, 2025</a>). The execution gap is the binding constraint &mdash; only 1% of companies are AI-mature despite widespread adoption (<a href="https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai" target="_blank" rel="noopener">McKinsey, 2026</a>).</p>
+      </div>
+      <div>
+        <p class="lever-num">02</p>
+        <p class="lever-title">Risk mitigation</p>
+        <p class="lever-body">The <a href="https://artificialintelligenceact.eu/" target="_blank" rel="noopener">EU AI Act</a> carries penalties up to &euro;35M or 7% of worldwide revenue. And 95% of generative AI pilots never reach production (<a href="https://finance.yahoo.com/news/mit-report-95-generative-ai-105412686.html" target="_blank" rel="noopener">MIT NANDA, 2025</a>) &mdash; structured governance is what closes that gap.</p>
+      </div>
+      <div>
+        <p class="lever-num">03</p>
+        <p class="lever-title">Talent positioning</p>
+        <p class="lever-body">94% of employees stay longer when their company invests in their development (<a href="https://learning.linkedin.com/resources/workplace-learning-report" target="_blank" rel="noopener">LinkedIn</a>). AI delivers its largest gains to less-experienced staff &mdash; a 34% productivity lift for novices (<a href="https://www.nber.org/papers/w31161" target="_blank" rel="noopener">NBER, 2025</a>) &mdash; making capability-building a retention and leveling tool.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <div class="cta-inner">
+      <h2>Want to pressure-test these numbers for your specific context?</h2>
+      <p>30 minutes. No pitch deck. Just a conversation about whether this investment makes sense for your team, your market, and your timeline. Start with the free Team Baseline Assessment if it helps.</p>
+      <a class="book" id="book-link" href="https://heykaleb.com">Book a 30-min call &rarr;</a>
+      <p class="contact">kaleb@heykaleb.com &middot; heykaleb.com &middot; Loosbrock Strategies, LLC</p>
+    </div>
+  </div>
+
+  <!-- Methodology -->
+  <div class="method">
+    <p class="method-label">Methodology &amp; Sources</p>
+    <p>Calculations assume 2,000 working hours per year per researcher and 48 working weeks. The conservative time-savings default (2.2 hrs/week) is drawn from <a href="https://www.stlouisfed.org/on-the-economy/2025/feb/impact-generative-ai-work-productivity" target="_blank" rel="noopener">Federal Reserve research (St. Louis Fed, 2025)</a>, which found generative AI users save an average of 5.4% of work hours &mdash; roughly 2.2 hours per week. The moderate tier reflects an internal Instacart benchmark (33% operational velocity gain, 2023&ndash;2025). The high-adoption tier is supported by <a href="https://www.nber.org/papers/w31161" target="_blank" rel="noopener">NBER (2025)</a> findings of up to 34% productivity improvement for less-experienced workers.</p>
+    <p>UXR-specific adoption data: <a href="https://maze.co/resources/user-research-report/" target="_blank" rel="noopener">Maze Future of User Research Report 2026</a> &mdash; 69% of researchers now use AI in projects (+19% YoY). Capability and ROI-multiplier framing: <a href="https://www.bcg.com/capabilities/artificial-intelligence" target="_blank" rel="noopener">BCG</a> and <a href="https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai" target="_blank" rel="noopener">McKinsey State of AI</a>.</p>
+    <p>Currency conversions use approximate fixed rates for illustration only; final engagement quotes are provided in your preferred currency. Year 1 ROI does not include quality compound, risk mitigation, or talent positioning value &mdash; these are upside, not floor. Engagement recommendations are based on team size; final scoping depends on tooling environment, regulatory context (EU AI Act, GDPR), and team baseline (calibrated via the free Team Baseline Assessment). Full citations available in the ROI Framework PDF on request.</p>
+  </div>
+
+  <script>
+    (function () {
+      // ===================== CONFIG =====================
+      var CONFIG = {
+        weeksPerYear: 48,
+        hoursPerYear: 2000,
+        bookingLink: "https://heykaleb.com",   // <-- replace with your Calendly link
+
+        // Engagement tiers. Investment values are in USD (base);
+        // they convert automatically to the selected currency.
+        tiers: [
+          { maxTeam: 9,   name: "Foundation Engagement",        desc: "AI Readiness Analysis & Action Plan, paired with the free AI in UXR 101 course for your team.", investmentUSD: 7500,  timeline: "4 weeks" },
+          { maxTeam: 17,  name: "Foundation + Capability",       desc: "Phase 1 plus the Context Engineering Lab and remote workshop.",                                investmentUSD: 30000, timeline: "12 weeks" },
+          { maxTeam: 29,  name: "AIxUXR Agent Architect Sprint", desc: "Single-cohort comprehensive engagement culminating in a research agent hackathon.",          investmentUSD: 45000, timeline: "6\u20137 weeks", note: "10% volume discount applied" },
+          { maxTeam: 999, name: "AIxUXR Agent Architect Sprint", desc: "Multi-cohort enterprise engagement for distributed teams across markets.",                   investmentUSD: 70000, timeline: "6\u20137 weeks", note: "10% volume discount applied" }
+        ],
+
+        // Currency settings. rate = USD -> currency. costDefault/min/max are
+        // regional senior-UXR fully-loaded averages, in that currency.
+        currencies: {
+          USD: { symbol: "$", rate: 1.00, costDefault: 150000, costMin: 80000, costMax: 250000, costStep: 5000 },
+          GBP: { symbol: "\u00A3", rate: 0.79, costDefault: 90000,  costMin: 50000, costMax: 170000, costStep: 2500 },
+          EUR: { symbol: "\u20AC", rate: 0.92, costDefault: 105000, costMin: 60000, costMax: 200000, costStep: 5000 }
+        }
+      };
+      // ==================================================
+
+      var root = document.getElementById('aixuxr-roi-calc');
+      var inTeam = root.querySelector('#in-team');
+      var inCost = root.querySelector('#in-cost');
+      var inHours = root.querySelector('#in-hours');
+      var numTeam = root.querySelector('#num-team');
+      var numCost = root.querySelector('#num-cost');
+      var numHours = root.querySelector('#num-hours');
+      var costSym = root.querySelector('#cost-sym');
+      var cur = "USD";
+      var userTouchedCost = false;
+      var REDUCE_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var prev = { value: 0, roi: 0, invest: 0, hoursTotal: 0 };
+
+      function sym() { return CONFIG.currencies[cur].symbol; }
+      function money(n) { return sym() + Math.round(n).toLocaleString(); }
+      function moneyK(n) { return sym() + Math.round(n / 1000) + "K"; }
+      function paybackText(months) {
+        var m = Math.max(1, Math.round(months));
+        return 'Payback in ~' + m + (m === 1 ? ' month' : ' months');
+      }
+
+      function getTier(team) {
+        for (var i = 0; i < CONFIG.tiers.length; i++) {
+          if (team <= CONFIG.tiers[i].maxTeam) return CONFIG.tiers[i];
+        }
+        return CONFIG.tiers[CONFIG.tiers.length - 1];
+      }
+      function teamHelper(t) {
+        if (t > 29) return 'Multi-cohort scaling recommended';
+        if (t > 17) return 'Single cohort viable';
+        if (t > 9)  return 'Foundation + Capability fits';
+        return 'Foundation-only is the right entry';
+      }
+      function hoursHelper(h) {
+        if (h <= 2.2) return 'Conservative \u2014 Federal Reserve baseline (2.2 hrs/wk average for knowledge workers)';
+        if (h <= 4)   return 'Moderate \u2014 aligned with the Instacart 33% velocity-gain benchmark';
+        return 'High-adoption \u2014 supported by NBER\u2019s 34% productivity finding for less-experienced staff';
+      }
+
+      // ---- animated count-up (ease-out cubic) ----
+      function animateValue(el, from, to, dur, fmt) {
+        if (REDUCE_MOTION || Math.abs(to - from) < 0.0001) { el.innerHTML = fmt(to); return; }
+        var start = null;
+        function step(ts) {
+          if (start === null) start = ts;
+          var p = Math.min((ts - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3);
+          el.innerHTML = fmt(from + (to - from) * eased);
+          if (p < 1) requestAnimationFrame(step); else el.innerHTML = fmt(to);
+        }
+        requestAnimationFrame(step);
+      }
+
+      // ---- post height to parent for iframe auto-resize ----
+      function postHeight() {
+        try { window.parent.postMessage({ type: 'aixuxr-calc-height', height: root.scrollHeight }, '*'); } catch (e) {}
+      }
+
+      function setPresetActive(hours) {
+        root.querySelectorAll('#presets .preset').forEach(function (b) {
+          b.classList.toggle('active', parseFloat(b.getAttribute('data-hours')) === hours);
+        });
+      }
+
+      function applyCurrency(newCur) {
+        if (newCur === cur) return;
+        var oldC = CONFIG.currencies[cur];
+        var newC = CONFIG.currencies[newCur];
+        var oldCost = +inCost.value;
+        inCost.min = newC.costMin; inCost.max = newC.costMax; inCost.step = newC.costStep;
+        numCost.min = newC.costMin; numCost.max = newC.costMax; numCost.step = newC.costStep;
+        if (userTouchedCost) {
+          // preserve the user's figure via FX, clamped to the new regional range
+          var conv = Math.round((oldCost / oldC.rate) * newC.rate / newC.costStep) * newC.costStep;
+          inCost.value = Math.max(newC.costMin, Math.min(newC.costMax, conv));
+        } else {
+          inCost.value = newC.costDefault;
+        }
+        cur = newCur;
+        root.querySelectorAll('#curr-switch button').forEach(function (b) {
+          var on = b.getAttribute('data-cur') === cur;
+          b.classList.toggle('active', on);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        update(true);
+      }
+
+      function update(animate) {
+        var team = +inTeam.value;
+        var cost = +inCost.value;
+        var hours = +inHours.value;
+        var c = CONFIG.currencies[cur];
+
+        var hourly = cost / CONFIG.hoursPerYear;
+        var totalHours = team * hours * CONFIG.weeksPerYear;
+        var annualValue = hourly * totalHours;
+
+        var tier = getTier(team);
+        var investment = tier.investmentUSD * c.rate;
+        var roi = annualValue / investment;
+        var payback = (investment / annualValue) * 12;
+
+        // keep numeric inputs + slider a11y in sync (don't fight the user mid-type)
+        if (document.activeElement !== numTeam) numTeam.value = team;
+        if (document.activeElement !== numCost) numCost.value = cost;
+        if (document.activeElement !== numHours) numHours.value = (hours % 1 === 0 ? hours : +hours.toFixed(1));
+        costSym.textContent = sym();
+        inTeam.setAttribute('aria-valuetext', team + (team === 1 ? ' researcher' : ' researchers'));
+        inCost.setAttribute('aria-valuetext', money(cost));
+        inHours.setAttribute('aria-valuetext', (hours % 1 === 0 ? hours : hours.toFixed(1)) + ' hours per week');
+        root.querySelector('#help-team').textContent = teamHelper(team);
+        root.querySelector('#help-hours').textContent = hoursHelper(hours);
+        setPresetActive(hours);
+
+        var fmtMoney = function (n) { return money(n); };
+        var fmtRoi = function (n) { return n.toFixed(1) + '&times;'; };
+        var fmtHours = function (n) { return Math.round(n).toLocaleString() + ' researcher hours / year'; };
+
+        var elValue = root.querySelector('#out-value');
+        var elRoi = root.querySelector('#out-roi');
+        var elHoursTotal = root.querySelector('#out-hours-total');
+        var elAmtInvest = root.querySelector('#amt-invest');
+        var elAmtValue = root.querySelector('#amt-value');
+
+        if (animate) {
+          animateValue(elValue, prev.value, annualValue, 550, fmtMoney);
+          animateValue(elRoi, prev.roi, roi, 550, fmtRoi);
+          animateValue(elHoursTotal, prev.hoursTotal, totalHours, 550, fmtHours);
+          animateValue(elAmtInvest, prev.invest, investment, 550, fmtMoney);
+          animateValue(elAmtValue, prev.value, annualValue, 550, fmtMoney);
+        } else {
+          elValue.innerHTML = fmtMoney(annualValue);
+          elRoi.innerHTML = fmtRoi(roi);
+          elHoursTotal.innerHTML = fmtHours(totalHours);
+          elAmtInvest.innerHTML = fmtMoney(investment);
+          elAmtValue.innerHTML = fmtMoney(annualValue);
+        }
+
+        root.querySelector('#out-payback').textContent = paybackText(payback);
+
+        var maxVal = Math.max(annualValue, investment);
+        root.querySelector('#bar-invest').style.width = (investment / maxVal * 100) + '%';
+        root.querySelector('#bar-value').style.width = (annualValue / maxVal * 100) + '%';
+
+        root.querySelector('#rec-name').textContent = tier.name;
+        root.querySelector('#rec-desc').textContent = tier.desc;
+        var noteEl = root.querySelector('#rec-note');
+        if (tier.note) { noteEl.textContent = tier.note; noteEl.style.display = ''; }
+        else { noteEl.style.display = 'none'; }
+        root.querySelector('#rec-invest').textContent = money(investment);
+        root.querySelector('#rec-timeline').textContent = tier.timeline;
+
+        // plain-English answer (BLUF) — conditional framing for low-ROI inputs
+        var hoursLabel = (hours % 1 === 0 ? hours : hours.toFixed(1));
+        var pm = Math.max(1, Math.round(payback));
+        var pmText = '~' + pm + (pm === 1 ? ' month' : ' months');
+        var summaryEl = root.querySelector('#summary-text');
+        if (roi < 1.5) {
+          summaryEl.innerHTML =
+            'A <strong>' + team + '-person</strong> team saving <strong>' + hoursLabel +
+            ' hrs/week</strong> recovers <strong>' + money(annualValue) + '</strong> in year one \u2014 a <strong>' +
+            roi.toFixed(1) + '&times;</strong> time-return on a ' + money(investment) +
+            ' engagement. At these inputs, most of the value sits in the three levers below: quality, risk, and retention.';
+        } else {
+          summaryEl.innerHTML =
+            'A <strong>' + team + '-person</strong> research team saving <strong>' + hoursLabel +
+            ' hrs/week</strong> at ' + money(cost) + ' fully-loaded recovers <strong>' + money(annualValue) +
+            '</strong> in year one \u2014 a <strong>' + roi.toFixed(1) + '&times;</strong> return on a ' +
+            money(investment) + ' engagement, paying back in <strong>' + pmText + '</strong>.';
+        }
+
+        prev.value = annualValue; prev.roi = roi; prev.invest = investment; prev.hoursTotal = totalHours;
+
+        postHeight();
+      }
+
+      // slider drag = instant; discrete actions (presets, currency, load) = animated
+      inTeam.addEventListener('input', function () { update(false); });
+      inCost.addEventListener('input', function () { userTouchedCost = true; update(false); });
+      inHours.addEventListener('input', function () { update(false); });
+
+      // numeric inputs drive the sliders (clamp to range)
+      function clampToSlider(slider, raw) {
+        var v = parseFloat(raw);
+        if (isNaN(v)) return null;
+        return Math.max(+slider.min, Math.min(+slider.max, v));
+      }
+      numTeam.addEventListener('input', function () { var v = clampToSlider(inTeam, numTeam.value); if (v !== null) { inTeam.value = v; update(false); } });
+      numCost.addEventListener('input', function () { var v = clampToSlider(inCost, numCost.value); if (v !== null) { inCost.value = v; userTouchedCost = true; update(false); } });
+      numHours.addEventListener('input', function () { var v = clampToSlider(inHours, numHours.value); if (v !== null) { inHours.value = v; update(false); } });
+      // snap the displayed number back into range when focus leaves
+      [numTeam, numCost, numHours].forEach(function (n) { n.addEventListener('blur', function () { update(true); }); });
+
+      root.querySelectorAll('#curr-switch button').forEach(function (b) {
+        b.addEventListener('click', function () { applyCurrency(b.getAttribute('data-cur')); });
+      });
+      root.querySelectorAll('#presets .preset').forEach(function (b) {
+        b.addEventListener('click', function () {
+          inHours.value = b.getAttribute('data-hours');
+          update(true);
+        });
+      });
+
+      // reset to defaults
+      root.querySelector('#reset-btn').addEventListener('click', function () {
+        var c = CONFIG.currencies[cur];
+        inTeam.value = 20;
+        inHours.value = 2.2;
+        inCost.value = c.costDefault;
+        userTouchedCost = false;
+        update(true);
+      });
+
+      root.querySelector('#book-link').setAttribute('href', CONFIG.bookingLink);
+
+      // iframe auto-resize hooks
+      window.addEventListener('resize', postHeight);
+      window.addEventListener('load', postHeight);
+      if (window.ResizeObserver) { new ResizeObserver(postHeight).observe(root); }
+
+      // --- Prefill from URL params (handoff from the Team Baseline Assessment) ---
+      (function prefill() {
+        try {
+          var p = new URLSearchParams(window.location.search);
+          var pc = (p.get('cur') || '').toUpperCase();
+          if (CONFIG.currencies[pc]) {
+            cur = pc;
+            var c = CONFIG.currencies[cur];
+            inCost.min = c.costMin; inCost.max = c.costMax; inCost.step = c.costStep;
+            numCost.min = c.costMin; numCost.max = c.costMax; numCost.step = c.costStep;
+            root.querySelectorAll('#curr-switch button').forEach(function (b) {
+              var on = b.getAttribute('data-cur') === cur;
+              b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+          }
+          function setNum(el, raw) { var v = parseFloat(raw); if (isNaN(v)) return false; el.value = Math.max(+el.min, Math.min(+el.max, v)); return true; }
+          if (p.get('team') !== null) setNum(inTeam, p.get('team'));
+          if (p.get('hours') !== null) setNum(inHours, p.get('hours'));
+          if (p.get('cost') !== null && setNum(inCost, p.get('cost'))) userTouchedCost = true;
+        } catch (e) {}
+      })();
+
+      update(true);                 // initial paint with entrance animation
+      setTimeout(postHeight, 350);  // re-post after fonts settle
+      setTimeout(postHeight, 1200);
+    })();
+  </script>
+</div>

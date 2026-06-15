@@ -1,0 +1,454 @@
+<!-- ============================================================
+     AIxUXR — Team Baseline Assessment (conversational intake)
+     Self-contained. No dependencies. Brand-matched to heykaleb.com
+     (navy + coral + textured paper, WCAG AA, brand system v1.3).
+     Flow: intro -> team -> cost -> hours -> blocker -> snapshot
+     Hands off to roi_calculator.html prefilled via URL params.
+     COLOR RULE: coral = decoration/fills only; teal-ink = accent text;
+       on navy use blush / paper (never coral).
+     NOTE: email capture is a prototype stub — wire to your ESP /
+       Squarespace form in production (see handleEmail()).
+     ============================================================ -->
+<div id="aixuxr-intake">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,800&family=Quicksand:wght@400;500;600;700&family=Lexend:wght@300;400;500;600;700&display=swap');
+
+    #aixuxr-intake{
+      --ink:#243C54; --ink-deep:#1A2C40; --coral:#FA6060; --teal:#549C9C; --teal-ink:#356E6E;
+      --blush:#EFA8A8; --dark-text:#3a1414; --paper:#F3F1EC; --paper-deep:#E9E4D9; --body:#33424F;
+      --line:#DAD3C5; --btn-radius:4px;
+      --display:'Playfair Display',Georgia,serif; --head:'Quicksand',system-ui,sans-serif; --sans:'Lexend',system-ui,sans-serif;
+      all:initial; display:block; font-family:var(--sans); color:var(--body); line-height:1.55;
+      -webkit-font-smoothing:antialiased; position:relative; min-height:100%;
+      background-color:var(--paper);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+      background-blend-mode:multiply;
+      padding:40px 20px;
+    }
+    #aixuxr-intake *,#aixuxr-intake *::before,#aixuxr-intake *::after{ box-sizing:border-box; margin:0; padding:0; }
+
+    #aixuxr-intake .card{ max-width:640px; margin:0 auto; background:#fff; border:1px solid var(--line); border-radius:8px; padding:clamp(26px,4vw,44px); }
+
+    #aixuxr-intake .eyebrow{ font-family:var(--head); font-weight:700; font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--teal-ink); }
+
+    /* progress */
+    #aixuxr-intake .pwrap{ display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:26px; }
+    #aixuxr-intake .ptrack{ flex:1; height:6px; background:var(--paper-deep); border-radius:30px; overflow:hidden; }
+    #aixuxr-intake .pfill{ height:100%; width:0; background:var(--coral); border-radius:30px; transition:width .35s ease; }
+    #aixuxr-intake .pcount{ font-family:var(--head); font-weight:600; font-size:12px; color:var(--teal-ink); white-space:nowrap; }
+
+    /* steps */
+    #aixuxr-intake .step[hidden]{ display:none; }
+    #aixuxr-intake h2.q{ font-family:var(--display); font-weight:800; font-size:clamp(26px,4vw,38px); line-height:1.1; color:var(--ink); letter-spacing:-.01em; outline:none; }
+    #aixuxr-intake h2.q em{ font-style:italic; color:var(--teal-ink); }
+    #aixuxr-intake .qsub{ font-size:15px; color:var(--body); margin-top:10px; }
+
+    /* numeric + slider */
+    #aixuxr-intake .field{ margin-top:26px; }
+    #aixuxr-intake .field-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:8px; }
+    #aixuxr-intake .field-label{ font-family:var(--head); font-weight:600; font-size:13px; color:var(--body); }
+    #aixuxr-intake .fv{ display:inline-flex; align-items:baseline; gap:1px; }
+    #aixuxr-intake .num{ font-family:var(--display); font-weight:700; font-size:28px; color:var(--ink); width:3.6ch; border:0; border-bottom:2px solid var(--line); background:transparent; text-align:right; padding:0 2px 2px; -moz-appearance:textfield; }
+    #aixuxr-intake .num.wide{ width:7.4ch; }
+    #aixuxr-intake .num::-webkit-outer-spin-button,#aixuxr-intake .num::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+    #aixuxr-intake .num:focus{ outline:none; border-bottom-color:var(--coral); }
+    #aixuxr-intake .sym,#aixuxr-intake .unit{ font-family:var(--display); font-weight:700; font-size:28px; color:var(--ink); }
+    #aixuxr-intake .unit{ font-family:var(--sans); font-size:14px; font-weight:400; color:var(--body); }
+
+    #aixuxr-intake input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:3px; background:var(--ink); cursor:pointer; margin:6px 0; }
+    #aixuxr-intake input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; height:24px; width:24px; background:var(--coral); border:2px solid var(--blush); border-radius:50%; }
+    #aixuxr-intake input[type=range]::-moz-range-thumb{ height:22px; width:22px; background:var(--coral); border:2px solid var(--blush); border-radius:50%; }
+    #aixuxr-intake input[type=range]::-moz-range-track{ height:3px; background:var(--ink); }
+    #aixuxr-intake .helper{ font-size:12.5px; color:var(--teal-ink); font-style:italic; margin-top:8px; min-height:1.2em; }
+
+    /* presets + currency segmented */
+    #aixuxr-intake .chips{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+    #aixuxr-intake .chip{ font-family:var(--sans); font-size:12px; font-weight:600; padding:7px 14px; border:1.5px solid var(--line); border-radius:var(--btn-radius); background:#fff; color:var(--body); cursor:pointer; transition:border-color .12s,color .12s,background .12s; }
+    #aixuxr-intake .chip:hover{ border-color:var(--ink); color:var(--ink); }
+    #aixuxr-intake .chip.active{ border-color:var(--ink); background:var(--ink); color:#fff; }
+
+    #aixuxr-intake .seg{ display:flex; width:fit-content; border:1.5px solid var(--blush); border-radius:var(--btn-radius); overflow:hidden; background:var(--ink); margin-bottom:6px; }
+    #aixuxr-intake .seg button{ font-family:var(--sans); font-size:13px; font-weight:600; letter-spacing:.03em; padding:7px 16px; border:0; border-right:1.5px solid var(--blush); background:transparent; color:var(--blush); cursor:pointer; }
+    #aixuxr-intake .seg button:last-child{ border-right:0; }
+    #aixuxr-intake .seg button.active{ background:var(--paper); color:var(--ink); }
+
+    /* choice options (blocker) */
+    #aixuxr-intake .opts{ margin-top:24px; display:grid; gap:10px; }
+    #aixuxr-intake .opt{ text-align:left; font-family:var(--sans); font-size:15px; font-weight:500; color:var(--ink); background:#fff; border:1.5px solid var(--line); border-radius:var(--btn-radius); padding:16px 18px; cursor:pointer; transition:border-color .12s,background .12s; display:flex; align-items:center; gap:12px; }
+    #aixuxr-intake .opt::before{ content:""; width:16px; height:16px; border-radius:50%; border:2px solid var(--line); flex:0 0 auto; transition:border-color .12s,background .12s; }
+    #aixuxr-intake .opt:hover{ border-color:var(--teal); }
+    #aixuxr-intake .opt[aria-checked="true"]{ border-color:var(--ink); background:var(--paper-deep); }
+    #aixuxr-intake .opt[aria-checked="true"]::before{ border-color:var(--coral); background:var(--coral); box-shadow:inset 0 0 0 3px #fff; }
+
+    /* nugget */
+    #aixuxr-intake .nugget{ margin-top:24px; background:var(--paper-deep); border-left:3px solid var(--coral); border-radius:0 6px 6px 0; padding:16px 18px; }
+    #aixuxr-intake .nugget .k{ font-family:var(--head); font-weight:700; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--teal-ink); margin-bottom:6px; }
+    #aixuxr-intake .nugget p{ font-size:14px; color:var(--ink); line-height:1.45; }
+    #aixuxr-intake .nugget a{ color:var(--teal-ink); font-weight:600; text-decoration:none; border-bottom:1px solid var(--line); }
+    #aixuxr-intake .nugget a:hover{ border-bottom-color:var(--teal-ink); }
+
+    /* nav */
+    #aixuxr-intake .nav{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:30px; }
+    #aixuxr-intake .btn{ font-family:var(--head); font-weight:700; font-size:14px; letter-spacing:.01em; padding:13px 28px; border-radius:var(--btn-radius); border:0; cursor:pointer; text-decoration:none; display:inline-block; transition:background .15s,color .15s,opacity .15s; }
+    #aixuxr-intake .btn-primary{ background:var(--ink); color:var(--paper); }
+    #aixuxr-intake .btn-primary:hover{ background:var(--ink-deep); }
+    #aixuxr-intake .btn-ghost{ background:transparent; color:var(--teal-ink); padding:13px 6px; }
+    #aixuxr-intake .btn-ghost:hover{ color:var(--ink); }
+    #aixuxr-intake .btn[disabled]{ opacity:.4; cursor:not-allowed; }
+
+    /* intro + result */
+    #aixuxr-intake .lead{ font-size:16px; color:var(--body); margin-top:14px; }
+    #aixuxr-intake .pivot{ font-family:var(--display); font-weight:800; font-style:italic; color:var(--teal-ink); }
+
+    #aixuxr-intake .snap{ background:var(--ink); border-top:3px solid var(--coral); border-radius:8px; padding:32px; position:relative; overflow:hidden; }
+    #aixuxr-intake .snap .k{ font-family:var(--head); font-weight:700; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--blush); }
+    #aixuxr-intake .snap .roi{ font-family:var(--display); font-weight:900; font-size:clamp(52px,11vw,84px); color:var(--paper); line-height:1; margin:6px 0; }
+    #aixuxr-intake .snap .val{ font-size:15px; color:#c7d2da; }
+    #aixuxr-intake .snap .val b{ color:var(--blush); font-weight:600; }
+    #aixuxr-intake .snap hr{ border:0; border-top:1px solid rgba(255,255,255,.14); margin:22px 0; }
+    #aixuxr-intake .snap .rec-k{ font-family:var(--head); font-weight:700; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--blush); margin-bottom:6px; }
+    #aixuxr-intake .snap .rec-name{ font-family:var(--display); font-weight:800; font-size:22px; color:var(--paper); }
+    #aixuxr-intake .snap .route{ font-size:14.5px; color:#c7d2da; margin-top:10px; line-height:1.5; }
+    #aixuxr-intake .snap .note{ display:inline-flex; align-items:center; gap:8px; margin-top:14px; font-family:var(--head); font-weight:600; font-size:12px; color:var(--blush); }
+    #aixuxr-intake .snap .note::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--coral); }
+
+    #aixuxr-intake .after{ margin-top:26px; }
+    #aixuxr-intake .after h3{ font-family:var(--display); font-weight:800; font-size:20px; color:var(--ink); margin-bottom:6px; }
+    #aixuxr-intake .cta-row{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:18px; }
+    #aixuxr-intake .email{ margin-top:22px; padding-top:20px; border-top:1px solid var(--line); }
+    #aixuxr-intake .email label{ font-family:var(--head); font-weight:600; font-size:13px; color:var(--body); }
+    #aixuxr-intake .email .row{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
+    #aixuxr-intake .email input[type=email]{ flex:1; min-width:200px; font-family:var(--sans); font-size:15px; padding:12px 14px; border:1.5px solid var(--line); border-radius:var(--btn-radius); color:var(--ink); background:#fff; }
+    #aixuxr-intake .email input[type=email]:focus{ outline:none; border-color:var(--teal); }
+    #aixuxr-intake .email .send{ background:var(--coral); color:var(--dark-text); font-family:var(--head); font-weight:700; font-size:14px; padding:12px 22px; border:0; border-radius:var(--btn-radius); cursor:pointer; }
+    #aixuxr-intake .email .send:hover{ background:#f04438; }
+    #aixuxr-intake .email .ok{ font-size:13.5px; color:var(--teal-ink); margin-top:10px; font-weight:600; }
+    #aixuxr-intake .deeper{ margin-top:20px; font-size:14px; }
+    #aixuxr-intake .deeper a{ color:var(--teal-ink); font-weight:600; text-decoration:none; border-bottom:1px solid var(--line); }
+    #aixuxr-intake .foot{ max-width:640px; margin:18px auto 0; font-size:11px; color:var(--teal-ink); text-align:center; }
+
+    /* focus + motion */
+    #aixuxr-intake button:focus-visible,#aixuxr-intake a:focus-visible,#aixuxr-intake input:focus-visible{ outline:3px solid var(--coral); outline-offset:2px; }
+    @media (prefers-reduced-motion: reduce){ #aixuxr-intake *{ transition:none !important; } }
+    #aixuxr-intake .sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+    @media (max-width:520px){ #aixuxr-intake .nav{ flex-direction:row; } #aixuxr-intake .btn{ padding:13px 20px; } }
+  </style>
+
+  <div class="card">
+    <div class="pwrap">
+      <span class="eyebrow">AIxUXR · Team Baseline Assessment</span>
+    </div>
+    <div class="pwrap" aria-hidden="true">
+      <div class="ptrack"><div class="pfill" id="pfill"></div></div>
+      <span class="pcount" id="pcount">Start</span>
+    </div>
+    <p class="sr" id="liveStep" role="status" aria-live="polite"></p>
+
+    <!-- INTRO -->
+    <section class="step" id="step-intro">
+      <h2 class="q" tabindex="-1">What's your team's AI <em>upside</em>?</h2>
+      <p class="lead">Four quick questions, with a sourced benchmark at each step. At the end you'll get a personalized ROI snapshot and the right starting point for your team — no email required to see it.</p>
+      <div class="nav">
+        <span></span>
+        <button class="btn btn-primary" id="start">Start the assessment</button>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section class="step" id="step-team" hidden>
+      <h2 class="q" tabindex="-1">How big is your research team?</h2>
+      <p class="qsub">Everyone doing research work — dedicated researchers and the people who research part-time.</p>
+      <div class="field">
+        <div class="field-head">
+          <label class="field-label" for="r-team" id="l-team">Researchers</label>
+          <span class="fv"><input type="number" class="num" id="n-team" min="5" max="60" step="1" value="20" aria-labelledby="l-team"></span>
+        </div>
+        <input type="range" id="r-team" min="5" max="60" step="1" value="20" aria-labelledby="l-team" aria-valuetext="20 researchers">
+      </div>
+      <div class="nugget">
+        <div class="k">Benchmark</div>
+        <p>69% of researchers already use AI in their work — adoption is the norm now, not the edge. <a href="https://maze.co/resources/user-research-report/" target="_blank" rel="noopener">Maze, 2026</a></p>
+      </div>
+      <div class="nav">
+        <button class="btn btn-ghost" data-back>Back</button>
+        <button class="btn btn-primary" data-next>Continue</button>
+      </div>
+    </section>
+
+    <!-- COST -->
+    <section class="step" id="step-cost" hidden>
+      <h2 class="q" tabindex="-1">What's the fully-loaded cost per researcher?</h2>
+      <p class="qsub">Salary plus benefits and overhead. A regional default is filled in — adjust to your team.</p>
+      <div class="seg" id="seg-cur" role="group" aria-label="Currency">
+        <button data-cur="USD" class="active" type="button" aria-pressed="true">$ USD</button>
+        <button data-cur="GBP" type="button" aria-pressed="false">&pound; GBP</button>
+        <button data-cur="EUR" type="button" aria-pressed="false">&euro; EUR</button>
+      </div>
+      <div class="field">
+        <div class="field-head">
+          <label class="field-label" for="r-cost" id="l-cost">Annual cost</label>
+          <span class="fv"><span class="sym" id="cur-sym" aria-hidden="true">$</span><input type="number" class="num wide" id="n-cost" min="80000" max="250000" step="5000" value="150000" aria-labelledby="l-cost"></span>
+        </div>
+        <input type="range" id="r-cost" min="80000" max="250000" step="5000" value="150000" aria-labelledby="l-cost" aria-valuetext="$150,000">
+      </div>
+      <div class="nugget">
+        <div class="k">Benchmark</div>
+        <p>AI lifts the whole team — the largest productivity gains land with the least-experienced researchers. <a href="https://www.nber.org/papers/w31161" target="_blank" rel="noopener">NBER, 2023</a></p>
+      </div>
+      <div class="nav">
+        <button class="btn btn-ghost" data-back>Back</button>
+        <button class="btn btn-primary" data-next>Continue</button>
+      </div>
+    </section>
+
+    <!-- HOURS -->
+    <section class="step" id="step-hours" hidden>
+      <h2 class="q" tabindex="-1">How many hours a week could AI give each person back?</h2>
+      <p class="qsub">Think transcription, synthesis, drafting, and desk research — the time-sinks AI handles well.</p>
+      <div class="field">
+        <div class="field-head">
+          <label class="field-label" for="r-hours" id="l-hours">Hours / researcher / week</label>
+          <span class="fv"><input type="number" class="num" id="n-hours" min="1" max="8" step="0.1" value="2.2" aria-labelledby="l-hours"> <span class="unit" aria-hidden="true">hrs</span></span>
+        </div>
+        <input type="range" id="r-hours" min="1" max="8" step="0.1" value="2.2" aria-labelledby="l-hours" aria-valuetext="2.2 hours per week">
+        <div class="chips" id="presets" role="group" aria-label="Adoption presets">
+          <button class="chip" data-hours="2.2" type="button">Conservative</button>
+          <button class="chip" data-hours="4" type="button">Moderate</button>
+          <button class="chip" data-hours="6" type="button">Aggressive</button>
+        </div>
+      </div>
+      <div class="nugget">
+        <div class="k">Benchmark</div>
+        <p>Knowledge workers save about 2.2 hours a week with generative AI — a conservative, real-world figure. <a href="https://www.stlouisfed.org/on-the-economy/2025/feb/impact-generative-ai-work-productivity" target="_blank" rel="noopener">St. Louis Fed, 2025</a></p>
+      </div>
+      <div class="nav">
+        <button class="btn btn-ghost" data-back>Back</button>
+        <button class="btn btn-primary" data-next>Continue</button>
+      </div>
+    </section>
+
+    <!-- BLOCKER -->
+    <section class="step" id="step-blocker" hidden>
+      <h2 class="q" tabindex="-1">What's the biggest thing holding your team back?</h2>
+      <p class="qsub">This shapes where you should start — pick the one that fits best.</p>
+      <div class="opts" id="opts" role="radiogroup" aria-label="Biggest blocker">
+        <button class="opt" type="button" role="radio" aria-checked="false" data-blocker="not-sure">We're not sure where to start</button>
+        <button class="opt" type="button" role="radio" aria-checked="false" data-blocker="ad-hoc">We use AI ad hoc, with no system</button>
+        <button class="opt" type="button" role="radio" aria-checked="false" data-blocker="scale">We need to scale it across the team</button>
+        <button class="opt" type="button" role="radio" aria-checked="false" data-blocker="compliance">We have compliance or risk concerns</button>
+      </div>
+      <div class="nugget">
+        <div class="k">Benchmark</div>
+        <p>95% of enterprise AI pilots fail to deliver ROI — almost always from missing enablement, not bad tools. The system is the difference. <a href="https://finance.yahoo.com/news/mit-report-95-generative-ai-105412686.html" target="_blank" rel="noopener">MIT NANDA, 2025</a></p>
+      </div>
+      <div class="nav">
+        <button class="btn btn-ghost" data-back>Back</button>
+        <button class="btn btn-primary" id="toResult" data-next disabled>See my snapshot</button>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section class="step" id="step-result" hidden>
+      <h2 class="q sr" tabindex="-1">Your snapshot</h2>
+      <div class="snap">
+        <div class="k">Your year-one snapshot</div>
+        <div class="roi" id="o-roi">0&times;</div>
+        <div class="val"><b id="o-value">$0</b> recovered &middot; <span id="o-payback">~0 months</span> to pay back</div>
+        <hr>
+        <div class="rec-k">Recommended starting point</div>
+        <div class="rec-name" id="o-rec">&mdash;</div>
+        <p class="route" id="o-route">&mdash;</p>
+        <span class="note" id="o-note" style="display:none"></span>
+      </div>
+
+      <div class="after">
+        <h3>See the full picture</h3>
+        <p class="lead" style="font-size:15px;">Your numbers carry straight into the interactive calculator — adjust assumptions, compare currencies, and see the sourced math.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" id="toCalc" href="#">Open my ROI calculator</a>
+          <a class="btn btn-ghost" href="#" id="restart">Start over</a>
+        </div>
+
+        <div class="email">
+          <label for="email">Want it in writing? Email me the full report (optional).</label>
+          <div class="row">
+            <input type="email" id="email" placeholder="you@company.com" autocomplete="email">
+            <button class="send" id="emailBtn" type="button">Send report</button>
+          </div>
+          <p class="ok" id="emailOk" style="display:none">Thanks — your report is on its way.</p>
+        </div>
+
+        <p class="deeper">Want a deeper read? Take the <a href="#" id="deeper">5-minute AI Readiness questionnaire</a> and I'll tailor a plan for your team.</p>
+      </div>
+    </section>
+  </div>
+  <div class="foot">AIxUXR · Team Baseline Assessment · hey kaleb · figures are sourced estimates, not a guarantee</div>
+
+  <script>
+    (function () {
+      var CONFIG = {
+        valueBasisHours: 2000, weeks: 48,
+        calculatorUrl: "roi_calculator.html", /* deploy: point to your live calculator URL */
+        readinessUrl: "#",                     /* deploy: point to the deeper questionnaire */
+        currencies: {
+          USD: { symbol: "$", rate: 1.00, costMin: 80000,  costMax: 250000, costDefault: 150000, costStep: 5000 },
+          GBP: { symbol: "\u00A3", rate: 0.79, costMin: 60000, costMax: 180000, costDefault: 90000, costStep: 5000 },
+          EUR: { symbol: "\u20AC", rate: 0.92, costMin: 70000, costMax: 200000, costDefault: 105000, costStep: 5000 }
+        },
+        tiers: [
+          { maxTeam: 9,   name: "Foundation Engagement",        invest: 7500,  timeline: "4 weeks" },
+          { maxTeam: 17,  name: "Foundation + Capability",      invest: 30000, timeline: "12 weeks" },
+          { maxTeam: 29,  name: "AIxUXR Agent Architect Sprint", invest: 45000, timeline: "6\u20137 weeks", note: "10% volume discount applied" },
+          { maxTeam: 999, name: "AIxUXR Agent Architect Sprint", invest: 70000, timeline: "6\u20137 weeks", note: "10% volume discount applied" }
+        ],
+        routes: {
+          "not-sure":   "Start with an AI Readiness Analysis \u2014 a clear baseline and action plan before you spend on tooling.",
+          "ad-hoc":     "You're ready for Context Engineering \u2014 turn ad-hoc prompting into a repeatable team system.",
+          "scale":      "You're ready to scale \u2014 the Agent Architect Sprint turns your whole team into agent builders.",
+          "compliance": "Lead with governance \u2014 a HEARTS evaluation gives you an auditable, defensible AI workflow."
+        }
+      };
+
+      var root = document.getElementById('aixuxr-intake');
+      var ORDER = ['intro', 'team', 'cost', 'hours', 'blocker', 'result'];
+      var QUESTIONS = ['team', 'cost', 'hours', 'blocker']; // counted toward progress
+      var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      var state = { i: 0, cur: 'USD', team: 20, cost: 150000, hours: 2.2, blocker: null, touchedCost: false };
+
+      var rTeam = root.querySelector('#r-team'), nTeam = root.querySelector('#n-team');
+      var rCost = root.querySelector('#r-cost'), nCost = root.querySelector('#n-cost'), curSym = root.querySelector('#cur-sym');
+      var rHours = root.querySelector('#r-hours'), nHours = root.querySelector('#n-hours');
+
+      function sym() { return CONFIG.currencies[state.cur].symbol; }
+      function money(n) { return sym() + Math.round(n).toLocaleString(); }
+      function clamp(el, v) { v = parseFloat(v); if (isNaN(v)) return null; return Math.max(+el.min, Math.min(+el.max, v)); }
+
+      function show() {
+        var key = ORDER[state.i];
+        ORDER.forEach(function (k) { root.querySelector('#step-' + k).hidden = (k !== key); });
+        // progress
+        var qIdx = QUESTIONS.indexOf(key);
+        var pct = key === 'result' ? 100 : (qIdx < 0 ? 0 : (qIdx / QUESTIONS.length) * 100);
+        root.querySelector('#pfill').style.width = pct + '%';
+        var pc = root.querySelector('#pcount');
+        if (key === 'intro') pc.textContent = 'Start';
+        else if (key === 'result') pc.textContent = 'Done';
+        else pc.textContent = 'Question ' + (qIdx + 1) + ' of ' + QUESTIONS.length;
+        root.querySelector('#liveStep').textContent = pc.textContent;
+        if (key === 'result') renderResult();
+        // focus the heading for screen-reader + keyboard users
+        var h = root.querySelector('#step-' + key + ' h2');
+        if (h) { try { h.focus(); } catch (e) {} }
+        postHeight();
+      }
+      // tell the parent page (e.g. Squarespace) how tall to make the iframe.
+      // same message type as the calculator, so one parent listener handles both.
+      function postHeight() {
+        try { window.parent.postMessage({ type: 'aixuxr-calc-height', height: root.scrollHeight }, '*'); } catch (e) {}
+      }
+      function go(key) { state.i = ORDER.indexOf(key); show(); }
+      function next() { if (state.i < ORDER.length - 1) { state.i++; show(); } }
+      function back() { if (state.i > 0) { state.i--; show(); } }
+
+      function syncTeam() { if (document.activeElement !== nTeam) nTeam.value = state.team; rTeam.value = state.team; rTeam.setAttribute('aria-valuetext', state.team + (state.team === 1 ? ' researcher' : ' researchers')); }
+      function syncCost() { if (document.activeElement !== nCost) nCost.value = state.cost; rCost.value = state.cost; curSym.textContent = sym(); rCost.setAttribute('aria-valuetext', money(state.cost)); }
+      function syncHours() { var disp = (state.hours % 1 === 0 ? state.hours : +state.hours.toFixed(1)); if (document.activeElement !== nHours) nHours.value = disp; rHours.value = state.hours; rHours.setAttribute('aria-valuetext', disp + ' hours per week'); setPreset(); }
+      function setPreset() { root.querySelectorAll('#presets .chip').forEach(function (c) { c.classList.toggle('active', parseFloat(c.getAttribute('data-hours')) === state.hours); }); }
+
+      // team
+      rTeam.addEventListener('input', function () { state.team = +rTeam.value; syncTeam(); });
+      nTeam.addEventListener('input', function () { var v = clamp(rTeam, nTeam.value); if (v !== null) { state.team = v; rTeam.value = v; rTeam.setAttribute('aria-valuetext', v + ' researchers'); } });
+      nTeam.addEventListener('blur', syncTeam);
+      // cost
+      rCost.addEventListener('input', function () { state.cost = +rCost.value; state.touchedCost = true; syncCost(); });
+      nCost.addEventListener('input', function () { var v = clamp(rCost, nCost.value); if (v !== null) { state.cost = v; state.touchedCost = true; rCost.value = v; rCost.setAttribute('aria-valuetext', money(v)); } });
+      nCost.addEventListener('blur', syncCost);
+      // hours
+      rHours.addEventListener('input', function () { state.hours = +rHours.value; syncHours(); });
+      nHours.addEventListener('input', function () { var v = clamp(rHours, nHours.value); if (v !== null) { state.hours = v; rHours.value = v; setPreset(); } });
+      nHours.addEventListener('blur', syncHours);
+      root.querySelectorAll('#presets .chip').forEach(function (c) {
+        c.addEventListener('click', function () { state.hours = parseFloat(c.getAttribute('data-hours')); syncHours(); });
+      });
+
+      // currency
+      root.querySelectorAll('#seg-cur button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var newCur = b.getAttribute('data-cur'); if (newCur === state.cur) return;
+          var oldC = CONFIG.currencies[state.cur], newC = CONFIG.currencies[newCur];
+          rCost.min = newC.costMin; rCost.max = newC.costMax; rCost.step = newC.costStep;
+          nCost.min = newC.costMin; nCost.max = newC.costMax; nCost.step = newC.costStep;
+          if (state.touchedCost) {
+            var conv = Math.round((state.cost / oldC.rate) * newC.rate / newC.costStep) * newC.costStep;
+            state.cost = Math.max(newC.costMin, Math.min(newC.costMax, conv));
+          } else { state.cost = newC.costDefault; }
+          state.cur = newCur;
+          root.querySelectorAll('#seg-cur button').forEach(function (x) {
+            var on = x.getAttribute('data-cur') === newCur;
+            x.classList.toggle('active', on); x.setAttribute('aria-pressed', on ? 'true' : 'false');
+          });
+          syncCost();
+        });
+      });
+
+      // blocker
+      root.querySelectorAll('#opts .opt').forEach(function (o) {
+        o.addEventListener('click', function () {
+          state.blocker = o.getAttribute('data-blocker');
+          root.querySelectorAll('#opts .opt').forEach(function (x) { x.setAttribute('aria-checked', x === o ? 'true' : 'false'); });
+          root.querySelector('#toResult').disabled = false;
+        });
+      });
+
+      // nav buttons
+      root.querySelector('#start').addEventListener('click', next);
+      root.querySelectorAll('[data-next]').forEach(function (b) { b.addEventListener('click', function () { if (b.disabled) return; next(); }); });
+      root.querySelectorAll('[data-back]').forEach(function (b) { b.addEventListener('click', back); });
+      root.querySelector('#restart').addEventListener('click', function (e) { e.preventDefault(); go('intro'); });
+
+      // result
+      function calc() {
+        var c = CONFIG.currencies[state.cur];
+        var hourly = state.cost / CONFIG.valueBasisHours;
+        var totalHours = state.team * state.hours * CONFIG.weeks;
+        var annualValue = hourly * totalHours;
+        var tier = CONFIG.tiers.find(function (t) { return state.team <= t.maxTeam; });
+        var investment = tier.invest * c.rate;
+        var roi = annualValue / investment;
+        var payback = Math.max(1, Math.round((investment / annualValue) * 12));
+        return { annualValue: annualValue, tier: tier, investment: investment, roi: roi, payback: payback, totalHours: totalHours };
+      }
+      function renderResult() {
+        var r = calc();
+        root.querySelector('#o-roi').innerHTML = r.roi.toFixed(1) + '&times;';
+        root.querySelector('#o-value').textContent = money(r.annualValue);
+        root.querySelector('#o-payback').textContent = '~' + r.payback + (r.payback === 1 ? ' month' : ' months');
+        root.querySelector('#o-rec').textContent = r.tier.name;
+        root.querySelector('#o-route').textContent = CONFIG.routes[state.blocker] || '';
+        var noteEl = root.querySelector('#o-note');
+        if (r.tier.note) { noteEl.textContent = r.tier.note; noteEl.style.display = ''; } else { noteEl.style.display = 'none'; }
+        // handoff link with prefilled params
+        var q = '?team=' + state.team + '&cost=' + state.cost + '&hours=' + state.hours + '&cur=' + state.cur + '&blocker=' + (state.blocker || '');
+        root.querySelector('#toCalc').setAttribute('href', CONFIG.calculatorUrl + q);
+        root.querySelector('#deeper').setAttribute('href', CONFIG.readinessUrl);
+      }
+
+      // email (prototype stub)
+      root.querySelector('#emailBtn').addEventListener('click', function () {
+        var v = root.querySelector('#email').value.trim();
+        var ok = root.querySelector('#emailOk');
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) { ok.style.display = ''; ok.style.color = 'var(--coral)'; ok.textContent = 'Please enter a valid email.'; return; }
+        // PRODUCTION: POST {email:v, ...state} to your ESP / Squarespace form endpoint here.
+        ok.style.display = ''; ok.style.color = 'var(--teal-ink)'; ok.textContent = 'Thanks \u2014 your report is on its way to ' + v + '.';
+      });
+
+      // init
+      syncTeam(); syncCost(); syncHours();
+      show();
+      window.addEventListener('resize', postHeight);
+      window.addEventListener('load', postHeight);
+      if (window.ResizeObserver) { new ResizeObserver(postHeight).observe(root); }
+    })();
+  </script>
+</div>
