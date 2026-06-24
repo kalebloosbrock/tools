@@ -99,13 +99,19 @@
 
   /* results */
   #hs-results{display:none;}
-  .hs-band{background:var(--ink); border-radius:8px; padding:20px; color:var(--paper); margin:0 0 18px; border-top:5px solid var(--blush);}
+  .hs-sep{border:0; border-top:1px solid var(--line); margin:10px 0;}
+  .hs-resultcard{margin:0 0 18px;}
+  .hs-band{background:var(--ink); border-radius:8px 8px 0 0; padding:20px; color:var(--paper); margin:0; border-top:5px solid var(--blush);}
+  .hs-gridwrap{background:var(--paper); border:1px solid var(--line); border-top:0; border-radius:0 0 8px 8px; padding:16px 12px 10px;}
   .hs-band .tier-eyebrow{font-family:var(--head); font-weight:700; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--blush); margin:0 0 4px;}
   .hs-band h2{font-family:var(--display); font-weight:800; font-size:26px; margin:0 0 8px; color:var(--paper);}
   .hs-band .score{font-family:var(--display); font-weight:800; font-size:24px; color:var(--paper);}
   .hs-band .score small{font-family:var(--sans); font-weight:400; font-size:13px; color:var(--blush);}
   .hs-band p{font-size:14px; color:var(--paper); opacity:.95; margin:10px 0 0;}
   .hs-band .coverage{font-size:12px; color:var(--blush); font-style:italic; margin:8px 0 0;}
+  .hs-grid{margin:0 auto; max-width:340px;}
+  .hs-grid svg{display:block; width:100%; height:auto;}
+  .hs-sharecap{font-size:12.5px; color:var(--body); font-style:italic; text-align:center; margin:10px 0 0;}
   .hs-bars{margin:0 0 18px;}
   .hs-bar{display:flex; align-items:center; gap:10px; margin-bottom:9px;}
   .hs-bar .lbl{flex:0 0 150px; font-size:13px; font-weight:600; color:var(--ink);}
@@ -152,8 +158,8 @@
       <summary>How this works &amp; what it can't tell you</summary>
       <ul>
         <li>You'll answer <strong>15 questions</strong>, one at a time, across the six lenses — each on a <strong>1–5 frequency scale</strong> (1 = Never, 5 = Always). Pick <strong>"Not sure"</strong> if you can't see it; it's excluded from scoring.</li>
-        <li>Each <strong>lens</strong> is scored as the average of its questions; your <strong>overall</strong> is the average of the six lenses — so every lens counts equally.</li>
-        <li><strong>Bands:</strong> under 2.5 = Bolted On · 2.5–3.7 = In Transition · above 3.7 = Designed with Intention.</li>
+        <li>Each <strong>lens</strong> is the average of its questions. The six lenses roll up into two <strong>axes</strong> — <strong>Rigor</strong> (H, A, R) and <strong>Responsibility</strong> (E, T, S) — so every lens counts equally.</li>
+        <li>Your result is a <strong>2×2</strong>: your two axis scores place you in one of four quadrants (Exposed, Unguarded, Earnest, Assured). Axis scores are directional, not precise.</li>
         <li>Questions ask <strong>how often</strong> each practice actually happens — easier to answer honestly than agree/disagree.</li>
         <li>At the end, a few <strong>optional</strong> questions about your team help build <strong>anonymous benchmarks</strong> — used in aggregate only, never tied to you.</li>
         <li><strong>Limitation:</strong> a self-assessment from one person's view — a structured reflection to surface blind spots, not a formal audit or a measure of research quality. For a team-level read, the <a href="https://calendly.com/heykaleb/uxinsights-free-consultation-clone" target="_blank" rel="noopener">Team Baseline Assessment</a> is the rigorous counterpart — book a call to run it with your team.</li>
@@ -199,20 +205,27 @@
 
   <!-- RESULTS -->
   <section id="hs-results" aria-live="polite">
-    <div class="hs-band" id="hs-band">
-      <div class="tier-eyebrow">Your results</div>
-      <h2 id="hs-band-title" tabindex="-1"></h2>
-      <div class="score" id="hs-band-score"></div>
-      <div class="coverage" id="hs-coverage"></div>
-      <p id="hs-band-desc"></p>
+    <div class="hs-resultcard">
+      <div class="hs-band" id="hs-band">
+        <div class="tier-eyebrow">Your results</div>
+        <h2 id="hs-band-title" tabindex="-1"></h2>
+        <div class="score" id="hs-band-score"></div>
+        <div class="coverage" id="hs-coverage"></div>
+        <p id="hs-band-desc"></p>
+      </div>
+      <div class="hs-gridwrap"><div class="hs-grid" id="hs-grid" role="img" aria-label="Your position on the Rigor by Responsibility grid"></div></div>
     </div>
+    <hr class="hs-sep">
     <div class="hs-bars" id="hs-bars"></div>
+    <hr class="hs-sep">
     <div class="hs-focus">
       <h3 id="hs-focus-title"></h3>
       <p id="hs-focus-body"></p>
     </div>
 
     <div class="startover-wrap"><a class="startover" id="hs-reset" href="#">Start over</a></div>
+
+    <hr class="hs-sep">
 
     <div class="hs-email">
       <h3>Want this as a takeaway?</h3>
@@ -229,11 +242,14 @@
       <div class="hs-priv">We only use your email to send your results and occasional AIxUXR resources. No spam. Unsubscribe anytime.</div>
     </div>
 
+    <hr class="hs-sep">
+
     <h2 class="nowwhat">Now what?</h2>
     <div class="hs-cta">
       <a class="btn btn-primary" id="hs-cta-primary" href="#" target="_blank" rel="noopener">Book a no-pitch consult — we'll walk through your results together</a>
       <a class="btn btn-outline" id="hs-cta-secondary" href="#" target="_blank" rel="noopener">Explore the full HEARTS framework</a>
     </div>
+    <p class="hs-sharecap" id="hs-sharecap" hidden></p>
   </section>
 
   <div class="tool-foot">The HEARTS Framework, developed by Kaleb Loosbrock with the AIxUXR community. · <a href="https://www.heykaleb.com/hearts-framework" target="_blank" rel="noopener">About the framework</a></div>
@@ -248,7 +264,8 @@
     frameworkUrl: "https://www.heykaleb.com/hearts-framework",
     courseUrl:    "https://www.userinterviews.com/ai-research-101-course",
     emailEndpoint: "https://script.google.com/macros/s/AKfycbz96C174nnrfqtRYRTqu90Sya4LeEbSWD9bPK6IbSOlzrP29HaHgwThzwXddJs4PQTC/exec",  // Apps Script web app (email lead + sends result)
-    dataEndpoint:  "https://script.google.com/macros/s/AKfycbz96C174nnrfqtRYRTqu90Sya4LeEbSWD9bPK6IbSOlzrP29HaHgwThzwXddJs4PQTC/exec"   // same Apps Script (anonymous completion)
+    dataEndpoint:  "https://script.google.com/macros/s/AKfycbz96C174nnrfqtRYRTqu90Sya4LeEbSWD9bPK6IbSOlzrP29HaHgwThzwXddJs4PQTC/exec",   // same Apps Script (anonymous completion)
+    scorecardUrl:  "https://www.heykaleb.com/hearts-scorecard"   // used for the LinkedIn share CTA — update to your live slug
   };
   var STEM = "How frequently do you or your team…";
 
@@ -289,11 +306,15 @@
     S:{t:"Your focus: safety, security, sustainability.", b:"This is where compliance exposure (EU AI Act, PII) and team burnout live. Worth a focused conversation before you scale further.", cta:"consult"}
   };
 
-  var BANDS = [
-    {max:2.5,  title:"Bolted On",               desc:"AI is attached to the old process, not designed into it. That's where ROI, reputation, and rigor leak. The good news: every lens below is a lever you can pull."},
-    {max:3.71, title:"In Transition",           desc:"You've started designing around AI, but the system isn't whole yet. Your lowest lens is the highest-leverage place to focus next."},
-    {max:5.01, title:"Designed with Intention", desc:"Your workflow is genuinely designed, not bolted on. The lens below is simply where to keep your edge sharp."}
-  ];
+  // 2x2: Rigor (H,A,R) x Responsibility (E,T,S)
+  var AXES = { rigor:["H","A","R"], resp:["E","T","S"] };
+  var AXIS_MID = 3.5;
+  var QUADRANTS = {
+    Assured:   {title:"Assured",   desc:"Rigorous and responsible — work you can stand behind. You're in rare company."},
+    Unguarded: {title:"Unguarded", desc:"Your work is rigorous, but it's under-protected — disclosure, data security, and ethics are where exposure hides. That's a governance gap, not a quality one."},
+    Earnest:   {title:"Earnest",   desc:"You're conscientious about ethics and safety, but rigor — validation, oversight, keeping humans in the loop — isn't consistent yet. That's where validity quietly breaks."},
+    Exposed:   {title:"Exposed",   desc:"Risk shows up on both fronts: the soundness of the work and the safeguards around it. The good news — every lens below is a lever. Start with your lowest."}
+  };
 
   // flatten 14 items with lens context
   var ITEMS = [];
@@ -313,6 +334,32 @@
   window.addEventListener('resize', postHeight); window.addEventListener('load', postHeight);
   if(window.ResizeObserver){ new ResizeObserver(postHeight).observe(root); }
   function round1(x){ return Math.round(x*10)/10; }
+
+  // 2x2 grid SVG with a "you are here" dot
+  function gridSVG(rigor, resp, active){
+    var L=56, Rt=336, T=24, B=304, W=Rt-L, H=B-T;
+    function X(s){ return L + ((s-1)/4)*W; }
+    function Y(s){ return B - ((s-1)/4)*H; }
+    var mx=X(AXIS_MID), my=Y(AXIS_MID);
+    function cell(x,y,w,h,name){
+      return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" style="fill:'+(name===active?'var(--paper-deep)':'transparent')+';stroke:var(--line);stroke-width:1"></rect>';
+    }
+    function qlabel(name,x,y){
+      var on=name===active;
+      return '<text x="'+x+'" y="'+y+'" text-anchor="middle" style="font-family:var(--head);font-weight:700;font-size:12px;fill:'+(on?'var(--ink)':'var(--body)')+';opacity:'+(on?1:.55)+'">'+name+'</text>';
+    }
+    var svg='<svg viewBox="0 0 360 348" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">';
+    svg+=cell(L,T,mx-L,my-T,'Earnest')+cell(mx,T,Rt-mx,my-T,'Assured')+cell(L,my,mx-L,B-my,'Exposed')+cell(mx,my,Rt-mx,B-my,'Unguarded');
+    svg+=qlabel('Earnest',(L+mx)/2,T+18)+qlabel('Assured',(mx+Rt)/2,T+18)+qlabel('Exposed',(L+mx)/2,B-10)+qlabel('Unguarded',(mx+Rt)/2,B-10);
+    if(rigor!=null && resp!=null){
+      var dx=X(rigor), dy=Y(resp);
+      svg+='<text x="'+dx+'" y="'+(dy-14)+'" text-anchor="middle" style="font-family:var(--head);font-weight:700;font-size:11px;fill:var(--ink)">You</text>';
+      svg+='<circle cx="'+dx+'" cy="'+dy+'" r="9" style="fill:var(--coral);stroke:var(--paper);stroke-width:2"></circle>';
+    }
+    svg+='<text x="'+((L+Rt)/2)+'" y="'+(B+30)+'" text-anchor="middle" style="font-family:var(--head);font-weight:700;font-size:12px;letter-spacing:.06em;fill:var(--teal-ink)">RIGOR →</text>';
+    svg+='<text x="20" y="'+((T+B)/2)+'" text-anchor="middle" transform="rotate(-90 20 '+((T+B)/2)+')" style="font-family:var(--head);font-weight:700;font-size:12px;letter-spacing:.06em;fill:var(--teal-ink)">RESPONSIBILITY →</text>';
+    return svg+'</svg>';
+  }
 
   function renderStep(){
     var i=state.step, it=ITEMS[i];
@@ -407,13 +454,25 @@
     }
     var overall=rated.reduce(function(a,k){return a+subs[k];},0)/rated.length;
     var overallR=round1(overall);
+
+    // two axes: Rigor (H,A,R) x Responsibility (E,T,S)
+    function axisScore(keys){ var v=keys.map(function(k){return subs[k];}).filter(function(x){return x!=null;}); return v.length? v.reduce(function(a,b){return a+b;},0)/v.length : null; }
+    var rigor=axisScore(AXES.rigor), resp=axisScore(AXES.resp);
+    var rigorR=rigor==null?null:round1(rigor), respR=resp==null?null:round1(resp);
+    var hiR=rigor!=null&&rigor>=AXIS_MID, hiP=resp!=null&&resp>=AXIS_MID;
+    var quad=QUADRANTS[ hiR ? (hiP?"Assured":"Unguarded") : (hiP?"Earnest":"Exposed") ];
+    var isStrong=quad.title==="Assured";
+
     var urgency=["S","T","R","A","E","H"], weakest=null, low=99;
     urgency.forEach(function(k){ if(subs[k]!==null && subs[k]<low){ low=subs[k]; weakest=k; } });
-    var band=BANDS.filter(function(b){ return overallR < b.max; })[0];
 
-    document.getElementById("hs-band-title").textContent=band.title;
-    document.getElementById("hs-band-score").innerHTML="Your HEARTS score: "+overallR+" <small>/ 5</small>";
-    document.getElementById("hs-band-desc").textContent=band.desc;
+    document.getElementById("hs-band-title").textContent=quad.title;
+    document.getElementById("hs-band-score").innerHTML="Rigor <strong>"+(rigorR==null?"n/a":rigorR)+"</strong> · Responsibility <strong>"+(respR==null?"n/a":respR)+"</strong> <small>(of 5)</small>";
+    document.getElementById("hs-band-desc").textContent=quad.desc;
+
+    var grid=document.getElementById("hs-grid");
+    grid.innerHTML=gridSVG(rigor, resp, quad.title);
+    grid.setAttribute("aria-label","You are in the "+quad.title+" quadrant. Rigor "+(rigorR==null?"not rated":rigorR)+", Responsibility "+(respR==null?"not rated":respR)+" out of 5.");
 
     var barsEl=document.getElementById("hs-bars"); barsEl.innerHTML="";
     LENSES.forEach(function(L){
@@ -424,32 +483,43 @@
         +'<div class="num">'+num+'</div></div>');
     });
 
-    var nx=NEXT[weakest], isStrong=band.title==="Designed with Intention";
+    var nx=NEXT[weakest];
     document.getElementById("hs-focus-title").textContent = isStrong ? ("Keep your edge: "+weakest) : nx.t;
     document.getElementById("hs-focus-body").textContent  = isStrong
-      ? ("You're in strong shape. "+weakest+" is your lowest lens — the place to keep pressure-testing as you scale, so a designed workflow stays designed.")
+      ? ("You're in rare company. "+weakest+" is your lowest lens — keep pressure-testing it as you scale, so Assured stays Assured.")
       : nx.b;
 
-    var prim=document.getElementById("hs-cta-primary"), sec=document.getElementById("hs-cta-secondary");
     // carry the result into the Calendly booking so Kaleb sees it before the call
     var lensStr=["H","E","A","R","T","S"].map(function(k){ return k+":"+(subs[k]==null?"n/a":round1(subs[k])); }).join(" ");
     var segStr=[state.segments.role,state.segments.team,state.segments.industry,state.segments.region].filter(Boolean).join(", ");
-    var summary="HEARTS "+band.title+" "+overallR+"/5 | "+lensStr+" | weakest "+weakest+(segStr?(" | "+segStr):"");
+    var summary=quad.title+" | Rigor "+rigorR+" Resp "+respR+" | "+lensStr+" | weakest "+weakest+(segStr?(" | "+segStr):"");
     var sep=CONFIG.calendlyUrl.indexOf("?")>-1?"&":"?";
-    prim.href=CONFIG.calendlyUrl+sep+"utm_source=hearts_scorecard&utm_medium=tool&utm_content="+encodeURIComponent(band.title+" "+overallR+"/5")+"&a1="+encodeURIComponent(summary);
-    if(!isStrong && nx.cta==="course"){ sec.href=CONFIG.courseUrl; sec.textContent="Start AI in UXR 101 (free)"; }
-    else { sec.href=CONFIG.frameworkUrl; sec.textContent="Explore the full HEARTS framework"; }
+    var consultHref=CONFIG.calendlyUrl+sep+"utm_source=hearts_scorecard&utm_medium=tool&utm_content="+encodeURIComponent(quad.title+" R"+rigorR+" P"+respR)+"&a1="+encodeURIComponent(summary);
+
+    var prim=document.getElementById("hs-cta-primary"), sec=document.getElementById("hs-cta-secondary"), cap=document.getElementById("hs-sharecap");
+    if(isStrong){
+      prim.href="https://www.linkedin.com/sharing/share-offsite/?url="+encodeURIComponent(CONFIG.scorecardUrl||CONFIG.frameworkUrl);
+      prim.textContent="Share your result on LinkedIn";
+      sec.href=consultHref; sec.textContent="Or compare notes — book a no-pitch consult";
+      cap.textContent="Suggested caption: “I scored ‘Assured’ on the HEARTS Scorecard — rigorous and responsible AI in research. Where do you land?”";
+      cap.hidden=false;
+    } else {
+      var ctaCopy={Exposed:"Close the highest-risk gaps — book a no-pitch consult", Unguarded:"Tighten your safeguards — book a no-pitch consult", Earnest:"Shore up your rigor — book a no-pitch consult"};
+      prim.href=consultHref; prim.textContent=ctaCopy[quad.title];
+      sec.href=CONFIG.frameworkUrl; sec.textContent="Explore the full HEARTS framework";
+      cap.hidden=true;
+    }
 
     var answeredCount=0, naCount=0;
     ITEMS.forEach(function(it){ var v=state.answers[it.id]; if(v==="na"){ naCount++; } else if(v){ answeredCount++; } });
     document.getElementById("hs-coverage").textContent="Based on "+answeredCount+" of "+TOTAL+" answers"+(naCount?(" · "+naCount+" marked “Not sure”"):"");
 
-    lastResult={overall:overallR, band:band.title, weakest:weakest, subs:subs, segments:state.segments, answered:answeredCount, notSure:naCount, answers:state.answers};
+    lastResult={overall:overallR, quadrant:quad.title, band:quad.title, rigor:rigorR, resp:respR, weakest:weakest, subs:subs, segments:state.segments, answered:answeredCount, notSure:naCount, answers:state.answers};
 
     // anonymous data capture on completion (no email required) — see CONFIG.dataEndpoint
     if(CONFIG.dataEndpoint && !state.posted){
       try{ fetch(CONFIG.dataEndpoint,{method:"POST",body:JSON.stringify({
-        ts:new Date().toISOString(), overall:overallR, band:band.title, weakest:weakest,
+        ts:new Date().toISOString(), overall:overallR, band:quad.title, quadrant:quad.title, rigor:rigorR, resp:respR, weakest:weakest,
         subs:subs, answers:state.answers, segments:state.segments, answered:answeredCount, notSure:naCount
       })}); }catch(e){}
       state.posted=true;
@@ -476,10 +546,10 @@
 
   document.getElementById("hs-download").addEventListener("click", function(){
     if(!lastResult) return;
-    var isStrong=lastResult.band==="Designed with Intention", nx=NEXT[lastResult.weakest];
+    var isStrong=lastResult.band==="Assured", nx=NEXT[lastResult.weakest];
     var lines=LENSES.map(function(L){ var s=lastResult.subs[L.k]; return L.k+" · "+L.name+": "+(s===null?"Not rated":(Math.round(s*10)/10)+"/5"); }).join("\n");
     var focusLine=isStrong?("Keep your edge on "+lastResult.weakest+" as you scale."):(nx.t+"\n"+nx.b);
-    var txt="THE HEARTS SCORECARD — YOUR RESULTS\n====================================\n\nYour HEARTS score: "+lastResult.band+"  ("+lastResult.overall+"/5)\n\n"+lines+"\n\nYOUR FOCUS\n----------\n"+focusLine+"\n\nNEXT STEP\n---------\nBook a no-pitch consult: "+CONFIG.calendlyUrl+"\nThe full framework: "+CONFIG.frameworkUrl+"\n\nA self-assessment, not a formal audit. The HEARTS Framework, developed by Kaleb Loosbrock with the AIxUXR community.";
+    var txt="THE HEARTS SCORECARD — YOUR RESULTS\n====================================\n\nResult: "+lastResult.band+"  (Rigor "+lastResult.rigor+" · Responsibility "+lastResult.resp+", of 5)\n\n"+lines+"\n\nYOUR FOCUS\n----------\n"+focusLine+"\n\nNEXT STEP\n---------\nBook a no-pitch consult: "+CONFIG.calendlyUrl+"\nThe full framework: "+CONFIG.frameworkUrl+"\n\nA self-assessment, not a formal audit. The HEARTS Framework, developed by Kaleb Loosbrock with the AIxUXR community.";
     var w=window.open("","_blank");
     if(w){ w.document.write("<pre style='font-family:ui-monospace,monospace;white-space:pre-wrap;padding:24px;line-height:1.5'>"+txt.replace(/&/g,"&amp;").replace(/</g,"&lt;")+"</pre>"); w.document.close(); w.print(); }
   });
