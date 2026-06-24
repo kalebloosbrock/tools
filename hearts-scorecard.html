@@ -23,10 +23,9 @@
     font-family:var(--sans); color:var(--ink); line-height:1.55;
     max-width:640px; margin:0 auto; padding:6px; min-height:520px;
     background-color:var(--paper);
-    background-image:url("https://images.squarespace-cdn.com/content/v1/5331e1afe4b05113a3c343ad/f0505980-a52d-4d44-a9b9-2a85453434c2/Slide+Background.jpg?format=2500w");
-    /* Offline fallback (swap in when no network):
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E"); */
-    background-size:cover; background-position:center; background-repeat:no-repeat; background-blend-mode:multiply;
+    /* paper color dominant; texture dialed way back with a paper overlay (raise .86 -> .92 for even less, lower for more) */
+    background-image:linear-gradient(rgba(243,241,236,.86), rgba(243,241,236,.86)), url("https://images.squarespace-cdn.com/content/v1/5331e1afe4b05113a3c343ad/f0505980-a52d-4d44-a9b9-2a85453434c2/Slide+Background.jpg?format=2500w");
+    background-size:cover; background-position:center; background-repeat:no-repeat;
   }
   #prototype *{box-sizing:border-box;}
   #prototype p{margin:0 0 10px;}
